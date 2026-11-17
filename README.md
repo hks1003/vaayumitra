@@ -1,6 +1,6 @@
 # VaayuMitra: wind-smart sails for small fishing boats
 
-**Live demo:** https://USERNAME.github.io/REPO/ (works on any phone; runs in the browser on today's forecast)
+**Live demo:** https://hks1003.github.io/vaayumitra/ (works on any phone; runs in the browser on today's forecast)
 **Poster:** [docs/poster.pdf](docs/poster.pdf), IIT Madras Research Scholars' Day 2026, sustainability theme
 
 Diesel is the largest cost for India's small-scale fishers. A low-cost sail (about ₹12,000) on an
