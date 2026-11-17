@@ -1,0 +1,26 @@
+{
+ "day": "2026-11-16",
+ "habit": {
+  "dep": 4,
+  "speed": 8,
+  "sail": 0,
+  "trip_h": 12.2,
+  "fuel": 27.9
+ },
+ "sail_only": {
+  "dep": 4,
+  "speed": 8,
+  "sail": 6.2,
+  "trip_h": 12.2,
+  "fuel": 21.8
+ },
+ "best": {
+  "dep": 8,
+  "speed": 7,
+  "sail": 7.1,
+  "trip_h": 13.1,
+  "fuel": 16.0,
+  "wind": 7.7,
+  "hs": 1.7
+ }
+}

@@ -1,0 +1,14 @@
+{
+  "days": 200,
+  "price": 100.0,
+  "price_hi": 121.0,
+  "co2_kg_L": 2.68,
+  "kit_inr": {
+    "frp_soft": 12000,
+    "trawler_soft": 65000,
+    "frp_wing": 36000,
+    "trawler_wing": 195000
+  },
+  "fleet": 10000,
+  "departure": "04:00 IST"
+}

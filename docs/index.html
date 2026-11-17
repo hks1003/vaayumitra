@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VaayuMitra Wind Advisor</title>
+<meta name="description" content="Wind advisor for small fishing boats: when to leave, how fast to go and when to raise the sail, from the live forecast.">
+<style>
+  @font-face { font-family: "Termes"; src: url(fonts/texgyretermes-regular.otf) format("opentype"); font-weight: 400; }
+  @font-face { font-family: "Termes"; src: url(fonts/texgyretermes-bold.otf) format("opentype"); font-weight: 700; }
+  @font-face { font-family: "Termes"; src: url(fonts/texgyretermes-italic.otf) format("opentype"); font-style: italic; }
+  :root {
+    --tg: #055A08; --dg: #0B4D1C; --mg: #2E8B3E; --lg: #ECF6EC; --lg2: #C9E4CC; --acc: #C0392B;
+    --ink: #1A1A1A; --ink2: #4a4a4a; --bg: #F7FAF7; --card: #FFFFFF; --line: #DCE8DD;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --tg: #7CCB83; --dg: #A6DDAB; --mg: #5DB767; --lg: #1C2A1D; --lg2: #2D4430; --acc: #FF7B6B;
+      --ink: #E8EEE8; --ink2: #B3BEB4; --bg: #0F1610; --card: #172018; --line: #2A372B;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.45 "Termes", "Times New Roman", serif; }
+  header { background: #055A08; color: #fff; padding: 18px 16px 14px; }
+  header h1 { margin: 0; font-size: 1.6rem; }
+  header p { margin: 4px 0 0; opacity: .9; font-style: italic; }
+  .lang { float: right; }
+  .lang button { font: inherit; font-size: .9rem; background: transparent; color: #fff; border: 1px solid #fff8;
+                 border-radius: 999px; padding: 2px 10px; margin-left: 4px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: #fff; color: #055A08; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: 300px 1fr; }
+  main > * { min-width: 0; }
+  @media (max-width: 760px) { main { grid-template-columns: minmax(0, 1fr); padding: 12px; } }
+  @media (max-width: 480px) { header .lang { float: none; margin-bottom: 6px; } th, td { padding: 4px 3px; font-size: .85rem; } }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 8px; font-size: 1.15rem; color: var(--tg); }
+  label { display: block; font-size: .92rem; color: var(--ink2); margin: 10px 0 3px; }
+  select, input[type=range] { width: 100%; font: inherit; font-size: 1rem; }
+  select { padding: 6px 8px; border: 1px solid var(--lg2); border-radius: 8px; background: var(--card); color: var(--ink); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--lg); border: 1px solid var(--lg2); border-radius: 12px; padding: 10px; text-align: center; }
+  .kpi .v { font-size: 1.7rem; font-weight: 700; color: var(--tg); line-height: 1.1; }
+  .kpi .l { font-size: .85rem; color: var(--ink2); }
+  .kpi .d { font-size: .85rem; color: var(--acc); font-weight: 700; }
+  .msg { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--lg); border-left: 5px solid var(--mg); }
+  .msg.warn { border-left-color: var(--acc); }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  th, td { padding: 5px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  tr.best td { background: var(--lg); font-weight: 700; }
+  .scroll { overflow-x: auto; }
+  .bars { margin-top: 12px; }
+  .bar { display: grid; grid-template-columns: 9.5em 1fr; align-items: center; gap: 8px; margin: 6px 0; font-size: .92rem; }
+  .bar .track { background: var(--lg); border-radius: 6px; height: 26px; position: relative; }
+  .bar .fill { height: 100%; border-radius: 6px; background: var(--mg); }
+  .bar .fill.habit { background: var(--lg2); }
+  .bar .fill.best { background: var(--tg); }
+  .bar .txt { position: absolute; left: 8px; top: 3px; font-weight: 700; color: var(--ink); }
+  .bar .fill.best + .txt { color: #fff; }
+  small, .note { color: var(--ink2); font-size: .85rem; }
+  footer { max-width: 1040px; margin: 0 auto; padding: 0 16px 24px; color: var(--ink2); font-size: .85rem; }
+  .spin { color: var(--ink2); font-style: italic; }
+  a { color: var(--tg); }
+</style>
+</head>
+<body>
+<header>
+  <div class="lang" role="group" aria-label="Language">
+    <button id="lang-en" aria-pressed="true">English</button><button id="lang-ta" aria-pressed="false">தமிழ்</button>
+  </div>
+  <h1 data-t="title">VaayuMitra: wind advisor for fishing boats</h1>
+  <p data-t="tag">When to leave, how fast to go and when to raise the sail, from tomorrow's forecast.</p>
+</header>
+
+<main>
+  <section class="card" aria-label="Trip">
+    <h2 data-t="trip">Your trip</h2>
+    <label for="boat" data-t="boat">Boat</label>
+    <select id="boat"><option value="frp">8.5 m FRP gillnet boat</option><option value="trawler">15 m single-day trawler</option></select>
+    <label for="harbour" data-t="harbour">Harbour</label>
+    <select id="harbour"><option>Chennai</option><option>Kochi</option><option>Visakhapatnam</option></select>
+    <label for="bearing" data-t="bearing">Fishing ground direction (degrees)</label>
+    <select id="bearing"></select>
+    <label for="dist" data-t="dist">Distance to ground (nautical miles)</label>
+    <select id="dist"><option>15</option><option selected>25</option><option>35</option></select>
+    <label for="sail" data-t="sailtype">Sail</label>
+    <select id="sail"><option value="soft">Soft lug-type sail</option><option value="wing">Rigid wing sail</option></select>
+    <label for="day" data-t="date">Trip date</label>
+    <select id="day"></select>
+    <label for="extra"><span data-t="extra">Extra time I can accept</span>: <b id="extra-v">2.0</b> h</label>
+    <input id="extra" type="range" min="0" max="3" step="0.5" value="2">
+  </section>
+
+  <section>
+    <div class="card" aria-live="polite">
+      <h2 data-t="advice">Advice</h2>
+      <div id="out"><p class="spin" data-t="loading">Fetching the live forecast…</p></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2 data-t="all">All options</h2>
+      <div class="scroll" id="table"></div>
+      <p class="note" id="base"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span data-t="foot">Research prototype, IIT Madras. Boat physics calibrated to CIFT-measured fuel rates; live wind and waves from</span>
+  <a href="https://open-meteo.com/">Open-Meteo</a>.
+  <span data-t="foot2">Savings are model estimates; past sail trials measured 6–10 % over whole trips.</span>
+  <a href="poster.pdf" data-t="poster">Poster (PDF)</a>
+</footer>
+
+<script src="physics.js"></script>
+<script>
+"use strict";
+const PRICE = 100, CO2 = 2.68;
+const T = { // Tamil wording to be checked by a native speaker
+  title: ["VaayuMitra: wind advisor for fishing boats", "வாயுமித்ரா: மீன்பிடி படகுகளுக்கான காற்று ஆலோசகர்"],
+  tag: ["When to leave, how fast to go and when to raise the sail, from tomorrow's forecast.",
+        "நாளைய வானிலை முன்னறிவிப்பில் இருந்து: எப்போது புறப்பட வேண்டும், எவ்வளவு வேகம், எப்போது பாய் விரிக்க வேண்டும்."],
+  trip: ["Your trip", "உங்கள் பயணம்"], boat: ["Boat", "படகு"], harbour: ["Harbour", "துறைமுகம்"],
+  bearing: ["Fishing ground direction (degrees)", "மீன்பிடி இடத்தின் திசை (டிகிரி)"],
+  dist: ["Distance to ground (nautical miles)", "மீன்பிடி இடத்திற்கான தூரம் (கடல் மைல்)"],
+  sailtype: ["Sail", "பாய்"], date: ["Trip date", "பயண தேதி"],
+  extra: ["Extra time I can accept", "ஏற்கக்கூடிய கூடுதல் நேரம்"],
+  advice: ["Advice", "ஆலோசனை"], all: ["All options", "அனைத்து வாய்ப்புகளும்"],
+  loading: ["Fetching the live forecast…", "வானிலை முன்னறிவிப்பு பெறப்படுகிறது…"],
+  dep: ["Leave at", "பரிந்துரைக்கப்பட்ட புறப்பாடு நேரம்"], speed: ["Steaming speed", "வேகம்"],
+  saved: ["Fuel saved", "சேமிக்கப்பட்ட எரிபொருள்"], rupees: ["Money saved", "சேமிக்கப்பட்ட பணம்"],
+  litres: ["litres", "லிட்டர்"], sail: ["Raise the sail", "பாய் விரிக்கவும்"],
+  nosail: ["Sail not useful on this trip (wind ahead, too weak, or seas too rough): keep it furled.",
+           "இந்தப் பயணத்தில் பாய் பயனில்லை (எதிர்க்காற்று, பலவீனமான காற்று அல்லது கடல் கொந்தளிப்பு): பாயை சுருட்டி வைக்கவும்."],
+  habit: ["Habit: 04:00, 8 kn, no sail", "வழக்கம்: 04:00, 8 நாட், பாய் இல்லை"],
+  same: ["Same trip, sail up", "அதே பயணம், பாயுடன்"], vm: ["VaayuMitra plan", "வாயுமித்ரா திட்டம்"],
+  foot: ["Research prototype, IIT Madras. Boat physics calibrated to CIFT-measured fuel rates; live wind and waves from",
+         "ஆய்வு முன்மாதிரி, ஐஐடி மெட்ராஸ். CIFT அளவிட்ட எரிபொருள் விகிதங்களுக்கு அளவீடு செய்யப்பட்ட இயற்பியல் மாதிரி; நேரடி காற்று, அலை தரவு:"],
+  foot2: ["Savings are model estimates; past sail trials measured 6–10 % over whole trips.",
+          "சேமிப்புகள் மாதிரி மதிப்பீடுகள்; முந்தைய சோதனைகளில் முழுப் பயணத்தில் 6–10 % அளவிடப்பட்டது."],
+  poster: ["Poster (PDF)", "சுவரொட்டி (PDF)"], offline: ["Live forecast unavailable. Check the internet connection and reload.",
+           "நேரடி முன்னறிவிப்பு கிடைக்கவில்லை. இணைய இணைப்பைச் சரிபார்த்து மீண்டும் ஏற்றவும்."],
+};
+let lang = 0;
+const $ = (id) => document.getElementById(id);
+const tr = (k) => T[k][lang];
+function applyLang() {
+  document.documentElement.lang = lang ? "ta" : "en";
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = tr(el.dataset.t); });
+  $("lang-en").setAttribute("aria-pressed", String(!lang)); $("lang-ta").setAttribute("aria-pressed", String(!!lang));
+  if (last) render(last);
+}
+$("lang-en").onclick = () => { lang = 0; applyLang(); };
+$("lang-ta").onclick = () => { lang = 1; applyLang(); };
+
+// ----- controls (deep link: ?boat=frp&harbour=Chennai&bearing=90, as used by the poster QR code) -----
+const qp = new URLSearchParams(location.search);
+if (VM.BOATS[qp.get("boat")]) $("boat").value = qp.get("boat");
+if (VM.HARBOURS[qp.get("harbour")]) $("harbour").value = qp.get("harbour");
+function fillBearings(pref) {
+  const brs = VM.HARBOURS[$("harbour").value][2];
+  $("bearing").innerHTML = brs.map((b) => `<option>${b}</option>`).join("");
+  if (brs.includes(+pref)) $("bearing").value = String(pref);
+}
+fillBearings(qp.get("bearing"));
+const IST = (d) => new Date(d.getTime() + 5.5 * 3600e3).toISOString().slice(0, 10);
+const today = new Date();
+$("day").innerHTML = [0, 1, 2].map((k) => {
+  const d = IST(new Date(today.getTime() + k * 86400e3));
+  return `<option value="${d}"${k === 1 ? " selected" : ""}>${d}</option>`;
+}).join("");
+
+// ----- live forecast (Open-Meteo, free, no key; only route coordinates are sent) -----
+const cache = {};
+async function forecast(route) {
+  const lat = route.map((s) => s.lat.toFixed(3)).join(","), lon = route.map((s) => s.lon.toFixed(3)).join(",");
+  const key = lat + "|" + lon;
+  if (cache[key]) return cache[key];
+  const base = `latitude=${lat}&longitude=${lon}&timezone=Asia%2FKolkata&forecast_days=3`;
+  const [w, m] = await Promise.all([
+    fetch(`https://api.open-meteo.com/v1/forecast?${base}&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=ms`).then((r) => r.json()),
+    fetch(`https://marine-api.open-meteo.com/v1/marine?${base}&hourly=wave_height`).then((r) => r.json()),
+  ]);
+  const W = Array.isArray(w) ? w : [w], M = Array.isArray(m) ? m : [m];
+  if (!W[0].hourly || !M[0].hourly) throw new Error("forecast");
+  const hsAll = M.flatMap((p) => p.hourly.wave_height).filter((v) => v != null);
+  const hsMean = hsAll.reduce((a, b) => a + b, 0) / Math.max(hsAll.length, 1);
+  return (cache[key] = {
+    time: W[0].hourly.time,
+    ws: W.map((p) => p.hourly.wind_speed_10m),
+    wd: W.map((p) => p.hourly.wind_direction_10m.map((d) => d * Math.PI / 180)),
+    hs: M.map((p) => p.hourly.wave_height.map((v) => (v == null ? hsMean : v))),
+  });
+}
+
+let last = null, runId = 0;
+async function run() {
+  const id = ++runId;
+  $("extra-v").textContent = (+$("extra").value).toFixed(1);
+  const boat = $("boat").value, harbour = $("harbour").value, bearing = +$("bearing").value,
+        dist = +$("dist").value, sail = $("sail").value, day = $("day").value;
+  $("out").innerHTML = `<p class="spin">${tr("loading")}</p>`;
+  try {
+    const fx = {};
+    for (const v of [8, 7, 6]) fx[v] = await forecast(VM.buildRoute(VM.makeBoat(boat, v), harbour, bearing, dist));
+    const time = fx[8].time, dayStart = time.indexOf(day + "T00:00");
+    const rows = VM.evaluate(boat, harbour, bearing, dist, sail, (route, idx, v) => ({
+      tws: idx.map((j, i) => fx[v].ws[i][j]), twd: idx.map((j, i) => fx[v].wd[i][j]), hs: idx.map((j, i) => fx[v].hs[i][j]),
+    }), dayStart, time.length);
+    if (id !== runId) return;
+    last = { rows, extra: +$("extra").value };
+    render(last);
+  } catch (e) {
+    if (id === runId) $("out").innerHTML = `<p class="msg warn">${tr("offline")}</p>`;
+  }
+}
+
+function render({ rows, extra }) {
+  if (!rows.length) { $("out").innerHTML = `<p class="msg warn">${tr("offline")}</p>`; return; }
+  const habit = rows.find((r) => r.dep === 4 && r.speed === 8);
+  const ok = rows.filter((r) => r.trip_h <= habit.trip_h + extra + 1e-6);
+  const best = ok.reduce((a, b) => (b.fuel_sail < a.fuel_sail ? b : a));
+  const saved = habit.fuel_nosail - best.fuel_sail, pct = 100 * saved / habit.fuel_nosail;
+  const hh = (d) => String(d).padStart(2, "0") + ":00";
+  const max = habit.fuel_nosail;
+  const bar = (label, v, cls) => `<div class="bar"><span>${label}</span><div class="track">
+      <div class="fill ${cls}" style="width:${Math.max(4, 100 * v / max).toFixed(1)}%"></div>
+      <span class="txt">${v.toFixed(1)} L</span></div></div>`;
+  $("out").innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="v">${hh(best.dep)}</div><div class="l">${tr("dep")}</div></div>
+      <div class="kpi"><div class="v">${best.speed} kn</div><div class="l">${tr("speed")}</div></div>
+      <div class="kpi"><div class="v">${saved.toFixed(1)}</div><div class="l">${tr("saved")} (${tr("litres")})</div><div class="d">−${pct.toFixed(0)} %</div></div>
+      <div class="kpi"><div class="v">₹${Math.round(saved * PRICE).toLocaleString("en-IN")}</div><div class="l">${tr("rupees")}</div><div class="d">${(saved * CO2).toFixed(0)} kg CO₂</div></div>
+    </div>
+    ${best.sail_hours > 0
+      ? `<p class="msg">⛵ <b>${tr("sail")}</b>: ${best.sail_hours.toFixed(1)} h · ${best.mean_wind.toFixed(1)} m/s · ${best.max_hs.toFixed(1)} m</p>`
+      : `<p class="msg warn">${tr("nosail")}</p>`}
+    <div class="bars">
+      ${bar(tr("habit"), habit.fuel_nosail, "habit")}
+      ${bar(`${tr("same")} ${habit.sail_hours.toFixed(1)} h`, habit.fuel_sail, "")}
+      ${bar(`${tr("vm")}: ${hh(best.dep)}, ${best.speed} kn`, best.fuel_sail, "best")}
+    </div>`;
+  const sorted = [...rows].sort((a, b) => a.fuel_sail - b.fuel_sail).slice(0, 10);
+  $("table").innerHTML = `<table><thead><tr><th>Leave</th><th>kn</th><th>Trip h</th><th>Sail h</th>
+      <th>No sail L</th><th>With sail L</th><th>Saved L</th></tr></thead><tbody>${sorted.map((r) =>
+      `<tr${r === best ? ' class="best"' : ""}><td>${hh(r.dep)}</td><td>${r.speed}</td><td>${r.trip_h.toFixed(1)}</td>
+       <td>${r.sail_hours.toFixed(1)}</td><td>${r.fuel_nosail.toFixed(1)}</td><td>${r.fuel_sail.toFixed(1)}</td>
+       <td>${(habit.fuel_nosail - r.fuel_sail).toFixed(1)}</td></tr>`).join("")}</tbody></table>`;
+  $("base").textContent = `Baseline: today's habit (leave 04:00, 8 kn, no sail) uses ${habit.fuel_nosail.toFixed(1)} L. ` +
+    `Diesel ₹${PRICE}/L; ${CO2} kg CO₂ per litre.`;
+}
+
+$("harbour").onchange = () => { fillBearings(); run(); };
+["boat", "bearing", "dist", "sail", "day"].forEach((k) => ($(k).onchange = run));
+$("extra").oninput = () => { $("extra-v").textContent = (+$("extra").value).toFixed(1); if (last) { last.extra = +$("extra").value; render(last); } };
+applyLang();
+run();
+</script>
+</body>
+</html>

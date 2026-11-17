@@ -1,0 +1,55 @@
+{
+  "sail_only_L_per_boat_yr": 520.0,
+  "sail_only_inr_per_boat_yr": 52000.0,
+  "sail_only_t_co2_per_boat_yr": 1.3936000000000002,
+  "india": {
+    "craft": 97659,
+    "ML_diesel": 50.78268,
+    "crore": 507.8268,
+    "kt_co2": 136.0975824
+  },
+  "Andhra Pradesh": {
+    "craft": 12078,
+    "L_trip": 3.1494325709064874,
+    "crore": 76.07769318281711,
+    "kt_co2": 20.388821772994987
+  },
+  "Kerala": {
+    "craft": 13868,
+    "L_trip": 1.7291678205672105,
+    "crore": 47.96019867125215,
+    "kt_co2": 12.853333243895577
+  },
+  "validation": {
+    "sail_trials_pct": {
+      "FAO range (variable wind)": [
+        5,
+        80
+      ],
+      "Baltic retrofit (Germany)": 19,
+      "33 ft vessel, Norway, 10-20 kn wind": [
+        10,
+        15
+      ],
+      "47 ft vessel, US appraisal": 37
+    },
+    "model_sail_pct": {
+      "FRP 6 kn mean": 15.5,
+      "FRP 8 kn mean": 8.29
+    },
+    "speed_cut_fuel_per_nm": {
+      "FAO 10 m trawler trial": {
+        "-10%": 28,
+        "-20%": 51
+      },
+      "model FRP": {
+        "-10%": 18,
+        "-20%": 34
+      },
+      "model trawler": {
+        "-10%": 19,
+        "-20%": 35
+      }
+    }
+  }
+}

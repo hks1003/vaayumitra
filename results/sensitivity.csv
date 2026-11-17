@@ -1,0 +1,16 @@
+knob,side,L,pct,payback_m,inr_yr
+Baseline,,2.598,14.295,2.771,51959.797
+Sail area ±20 %,low,2.196,12.029,3.279,43912.262
+Sail area ±20 %,high,2.931,16.197,2.456,58624.786
+Sail max lift CLmax ±20 %,low,2.379,13.048,3.027,47572.171
+Sail max lift CLmax ±20 %,high,2.857,15.764,2.52,57133.198
+Sail drag CD0 ±20 %,low,2.643,14.543,2.724,52867.412
+Sail drag CD0 ±20 %,high,2.554,14.056,2.819,51081.834
+Boat fuel calibration ±20 %,low,2.552,15.839,2.821,51038.245
+Boat fuel calibration ±20 %,high,2.619,12.951,2.749,52385.091
+Diesel price ₹90–121/L,low,2.598,14.295,3.079,46763.817
+Diesel price ₹90–121/L,high,2.598,14.295,2.29,62871.354
+Sail kit cost ₹8k–20k,low,2.598,14.295,4.619,51959.797
+Sail kit cost ₹8k–20k,high,2.598,14.295,1.848,51959.797
+Fishing days 150–250/yr,low,2.598,14.295,3.695,38969.848
+Fishing days 150–250/yr,high,2.598,14.295,2.217,64949.746

@@ -1,0 +1,51 @@
+{
+  "mlp_ensemble": {
+    "rmse_L": 0.6724780201911926,
+    "mae_L": 0.32558196783065796,
+    "r2": 0.9882675409317017
+  },
+  "lightgbm": {
+    "rmse_L": 0.9023960421807824,
+    "mae_L": 0.4573089571794281,
+    "r2": 0.9788735478198825
+  },
+  "conformal_q90_L": 0.7273325920059619,
+  "conformal_coverage_test": 0.8940755538643667,
+  "mean_save_L_test": 4.562154769897461,
+  "advisor_perfect_forecast": {
+    "advisor": 4.866875598781454,
+    "habit": 4.563153577877688,
+    "oracle": 4.974716001337666,
+    "base": 141.11713315993669,
+    "gain_vs_habit_pct": 6.655967539120766,
+    "share_of_oracle_pct": 73.79731569038672
+  },
+  "advisor_noisy_forecast": {
+    "advisor": 4.628173307333433,
+    "habit": 4.563153577877688,
+    "oracle": 4.974716001337666,
+    "base": 141.11713315993669,
+    "gain_vs_habit_pct": 1.424885845853674,
+    "share_of_oracle_pct": 15.798266739010938
+  },
+  "shap_mean_abs": {
+    "tws_mean": 3.023,
+    "boat": 2.3706,
+    "dist_nm": 1.0584,
+    "sail": 0.8007,
+    "bearing": 0.4178,
+    "v_ret": 0.2298,
+    "v_dep": 0.1887,
+    "u_mid": 0.1538,
+    "speed_kn": 0.1448,
+    "u_dep": 0.1116,
+    "harbour": 0.1065,
+    "hs_max": 0.1005,
+    "v_mid": 0.0958,
+    "u_ret": 0.0823,
+    "hs_mean": 0.0724,
+    "m_sin": 0.0339,
+    "dep_hour": 0.0118,
+    "m_cos": 0.0117
+  }
+}

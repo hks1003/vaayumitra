@@ -1,0 +1,29 @@
+# environments and caches
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# large data: ERA5 downloads (~2.5 GB) and simulated trip tables (~260 MB) are rebuilt by run_all.sh
+data/
+results/*.parquet
+results/*.npy
+runs/
+logs/*
+!logs/.gitkeep
+
+# credentials (the Copernicus key lives in ~/.cdsapirc, never in the repo)
+.cdsapirc
+*.env
+
+# LaTeX build files and local tools
+latex/*.aux
+latex/*.log
+latex/*.out
+latex/*_backup.tex
+tools/
+*.exe
+
+# OS
+Thumbs.db
+.DS_Store
